@@ -1,0 +1,139 @@
+{% extends 'store/base.html' %}
+{% load OurTag %}
+{% block title %}
+
+{#        <h1>商品列表</h1>#}
+        <a href="{% url 'store:add_goods' %}" style="margin-right: 50px">
+            <input type="submit" value="添加商品" class="btn btn-primary" >
+         </a>
+
+
+
+{% endblock %}
+{% block content %}
+
+    <div class="content">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>商品编号</th>
+                <th>商品名称</th>
+                <th>商品数量</th>
+                <th>商品价格</th>
+                <th>商品保质期</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <thbody>
+            {% for good in page_data %}
+            <tr>
+                <td>{{ good.id|zfill_id }}</td>
+                <td>{{ good.name }}</td>
+                <td>{{ good.number }}</td>
+                <td>￥<input type="text" value="{{ good.price }}" goods_id="{{ good.id }}" style="width: 50px" onblur="changePrice(this)"></td>
+                <td>{{ good.safe_data }}</td>
+               <td>
+                   {% ifequal good.state 1 %}
+                        <buttom class="btn btn-danger" onclick="changeState(this, 'down')"  goods_id="{{ good.id }}">下架</buttom>
+                    {% else %}
+                        <buttom class="btn btn-warning" onclick="changeState(this, 'up')"  goods_id="{{ good.id }}">上架</buttom>
+                   {% endifequal %}
+                    <buttom class="btn btn-primary">推荐</buttom>
+                </td>
+             </tr>
+
+            {% endfor %}
+
+        </thbody>
+    </table>
+    <div class="dataTables_paginate paging_simple_numbers">
+        <ul class="pagination">
+                {% for p in page_range %}
+                    {% if keywords %}
+                        {% ifequal p page %}
+                            <li class="paginate_button page-item previous disabled">
+                                <a class="page-link" href="/store/list_goods/?keywords={{ keywords }}&page={{ p }}">{{ p }}</a>
+                            </li>
+                        {% else %}
+                            <li class="paginate_button page-item previous">
+                                <a class="page-link" href="/store/list_goods/?keywords={{ keywords }}&page={{ p }}">{{ p }}</a>
+                            </li>
+                        {% endifequal %}
+                    {% else %}
+                        {% ifequal p page %}
+                            <li class="paginate_button page-item previous disabled">
+                                <a class="page-link" href="/store/list_goods/?page={{ p }}">{{ p }}</a>
+                            </li>
+                        {% else %}
+                            <li class="paginate_button page-item previous">
+                                <a class="page-link" href="/store/list_goods/?page={{ p }}">{{ p }}</a>
+                            </li>
+                        {% endifequal %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+    </div>
+    </div>
+
+{% block script %}
+    <script>
+        function changePrice(obj) {
+            var value = $(obj).val();
+            var id = $(obj).attr('goods_id');
+            var url = '/store/changePrice/?goods_id='+id+'&price='+value;
+            console.log(value);
+            console.log(url);
+
+            $.ajax(
+                {
+                    url:url,
+                    type:'get',
+                    data:'',
+                    success:function (data) {
+                       var code = data['code'];
+                       var price = data['data'];
+                       console.log(data)
+                       if(code == 200){
+                           alert('修改成功，当前价格为'+price)
+                       }
+                    },
+                    error:function (error) {
+                        console.log(error)
+                    }
+
+                }
+            )
+        }
+    </script>
+
+    <script>
+        function changeState(obj,state) {
+            var id = $(obj).attr('goods_id');
+            console.log(id);
+            var url = '/store/changeState/?goods_id='+id+'&state='+state;
+            console.log(url)
+            $.ajax(
+                {
+                    url:url,
+                    type:'get',
+                    data:'',
+                    success:function (data) {
+                        var code = data['code'];
+                       var price = data['data'];
+                       console.log(data);
+                       if(code == 200){
+                           alert('修改成功')
+                           window.location.reload();
+
+                       }
+                    },
+                    error:function (error) {
+                        console.log(error)
+                    }
+                }
+            )
+        }
+    </script>
+{% endblock %}
+
+{% endblock %}

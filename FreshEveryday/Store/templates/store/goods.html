@@ -1,0 +1,80 @@
+{% extends 'store/base.html' %}
+{% block title %}
+      <a href="/store/goods_update/{{ id }}/" style="margin-right: 50px">
+            <input type="submit" value="修改商品" class="btn btn-primary" >
+      </a>
+    <a href="/store/vgl/" style="margin-right: 50px;margin-right: 50px">
+            <input type="submit" value="商品列表" class="btn btn-primary" >
+    </a>
+{% endblock %}
+{% block style %}
+    <script src="/static/store/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/store/vue/vue.js"></script>
+    <script src="/static/store/vue/vue-resource.js"></script>
+{% endblock %}
+
+{% block content %}
+   {% verbatim myblock %}
+       <div id="content" class="content">
+              <table class="table">
+                <tr>
+                    <td rowspan="3">
+                        <img style="width: 200px; height: 200px;" v-bind:src="'/static/'+goods.picture">
+                    </td>
+                    <th>商品名称:</th>
+                    <td>{{ goods.name }}</td>
+                    <th>商品价格:</th>
+                    <td>{{ goods.price }}</td>
+                </tr>
+                <tr>
+                    <th>商品数量:</th>
+                    <td>{{ goods.number }}</td>
+                    <th>商品保质期:</th>
+                    <td>{{ goods.safe_data }}</td>
+                </tr>
+                <tr>
+                    <th>商品状态:</th>
+                    <td v-if="goods.state == 0" colspan="3">下架</td>
+                    <td v-if="goods.state == 1" colspan="3">上架</td>
+                </tr>
+                <tr>
+                    <th colspan="5">商品描述:</th>
+                </tr>
+                <tr>
+                    <td colspan="5" v-html="goods.description">
+
+                    </td>
+                </tr>
+            </table>
+       </div>
+    {% endverbatim myblock %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        Vue.use(VueResource);//声明采用VueResource对象
+        var vue = new Vue(
+            {
+                el:'#content',
+                data:{
+                   goods:{}
+                },
+                created:function () {
+                    var url = '/store/GoodsView/?id='+'{{ id }}';
+                    this.$http.get(url).then(
+                        function(data){
+                           this.goods = data["body"]["data"][0];
+                            console.log(data["body"]["data"][0])
+                        },
+                        function (error) {
+                            console.log(error)
+                        }
+                    )
+                },
+                methods:{
+
+                }
+            }
+        )
+    </script>
+{% endblock %}

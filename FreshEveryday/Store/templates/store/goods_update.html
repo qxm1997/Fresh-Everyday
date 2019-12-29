@@ -1,0 +1,96 @@
+{% extends 'store/base.html' %}
+{% block title %}
+     商品修改
+{% endblock %}
+{% block style %}
+   <script src="/static/store/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/store/vue/vue.js"></script>
+    <script src="/static/store/vue/vue-resource.js"></script>
+    <script src="/static/ckeditor/ckeditor/ckeditor.js"></script>
+{% endblock %}
+
+{% block content %}
+    {% verbatim myblock %}
+    <div id="content" class="content">
+          <form method="post" enctype="multipart/form-data" >
+            <p>
+                <input type="hidden" name="id" v-bind:value="goods.id">
+            </p>
+              <p>
+                  <input type="hidden" name="csrfmiddlewaretoken" v-bind:value="csrf_token">
+              </p>
+            <p>
+                <input type="text" name="name" placeholder="商品名称" v-bind:value="goods.name" class="form-control form-control-user">
+            </p>
+            <p>
+                <input type="text" name="price" placeholder="价格" v-bind:value="goods.price" class="form-control form-control-user">
+            </p>
+            <p>
+                <input type="text" name="safe_data" placeholder="保质期" v-bind:value="goods.safe_data" class="form-control form-control-user">
+            </p>
+            <p>
+                <input type="text" name="number" placeholder="商品数量" v-bind:value="goods.number" class="form-control form-control-user">
+            </p>
+            <p>
+                <textarea name="description1"  placeholder="商品描述" v-bind:value="goods.description" class="form-control form-control-user">
+                </textarea>
+            </p>
+            <p>
+                 <select name="goods_type"  class="form-control form-control-user" >
+                        <option v-for="good in goodstype" value= "{{ good.id }}" >{{ good.type_name }} </option>
+                 </select>
+            </p>
+            <p>
+                <input type="file" name="picture"  class="form-control form-control-user">
+            </p>
+            <p><input type="submit" value="提交"></p>
+    </form>
+    </div>
+    {% endverbatim myblock %}
+    {% block script %}
+            <script>
+            CKEDITOR.replace('description1' ,
+                {
+                 uiColor: '#ffffff',
+             });
+            </script>
+         <script>
+            Vue.use(VueResource);//声明采用VueResource对象
+            var vue = new Vue(
+                {
+                    el: '#content',
+                    data: {
+                        goods: {},
+                        csrf_token: '{{ csrf_token }}',
+                        goodstype: [],
+                    },
+                    created:function () {
+                        var url = '/store/GoodsView/?id='+'{{ id }}';
+                        this.$http.get(url).then(
+                            function(data){
+                               this.goods = data["body"]["data"][0];
+                                console.log(data["body"]["data"][0])
+                            },
+                            function (error) {
+                                console.log(error)
+                            }
+                        );
+                         this.$http.get('/store/GoodsType/').then(
+                            function(data){
+                              this.goodstype = data['body']['data'];
+                                console.log(this.goodstype);
+                            },
+                            function (error) {
+                                console.log(error)
+                            }
+                        )
+                    },
+
+                    methods:{
+
+                    }
+                }
+            )
+       </script>
+    {% endblock %}
+{% endblock %}

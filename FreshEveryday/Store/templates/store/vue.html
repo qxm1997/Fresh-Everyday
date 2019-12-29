@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/static/store/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/store/vue/vue.js"></script>
+</head>
+<body>
+{% verbatim myblock %}
+    <div id="content">
+        {{ message }} <!--绑定变量-->
+        <hr>
+        <input type="text" v-model="message"> <!--双向绑定-->
+        <hr>
+        <ul>
+            <li v-for="t in teachers">
+                {{ t }}
+            </li>
+
+        </ul>
+        <hr>
+        <p v-if="happy">
+            {{ message }}
+        </p>
+        <hr>
+        <span v-show="happy=='b'">{{ message }}</span>
+        <hr>
+        <span v-on:click="ok()">点我呀</span>
+        <hr>
+        <span v-bind:class="happy">点我呀</span>
+    </div>
+{% endverbatim myblock %}
+<script>
+    var vue = new Vue(
+        {
+            el: '#content',
+            data: {
+                message: 'hello world!!',
+                teachers: [
+                    '老梁',
+                    '波哥',
+                    '车王',
+                    '刘瑞',
+                    '老边',
+                    '？'
+                ],
+                happy: 'b',
+                methods:{
+                    'ok':alert('hello world')
+                }
+            }
+        }
+    )
+</script>
+</body>
+</html>

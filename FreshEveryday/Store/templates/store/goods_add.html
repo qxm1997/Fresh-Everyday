@@ -1,0 +1,36 @@
+{% extends 'store/base.html' %}
+{% block title %}
+添加商品
+{% endblock %}
+{% block content %}
+    <form method="post" enctype="multipart/form-data" class="form-control-lg">
+        {% csrf_token %}
+        <p>
+            <input type="text" name="name" placeholder="商品名称">
+        </p>
+        <p>
+            <input type="text" name="price" placeholder="价格">
+        </p>
+        <p>
+            <input type="text" name="safe_data" placeholder="保质期">
+        </p>
+        <p>
+            <input type="text" name="number" placeholder="商品数量">
+        </p>
+        <p>
+            <select name="goods_type" >
+                {% for t in type_list %}
+                    <option value="{{ t.id }}">{{ t.type_name }}</option>
+                {% endfor %}
+
+            </select>
+        </p>
+        <p>
+            <textarea name="description"  placeholder="商品描述"></textarea>
+        </p>
+        <p>
+            <input type="file" name="picture">
+        </p>
+        <p><input type="submit" value="提交"></p>
+    </form>
+{% endblock %}

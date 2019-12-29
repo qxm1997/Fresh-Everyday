@@ -1,0 +1,147 @@
+{% extends 'store/base.html' %}
+{% block style %}
+    <script src="/static/store/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/store/vue/vue.js"></script>
+    <script src="/static/store/vue/vue-resource.js"></script>
+{% endblock %}
+{% load OurTag %}
+{% block title %}
+
+{#        <h1>商品列表</h1>#}
+        <a href="{% url 'store:add_goods' %}" style="margin-right: 50px">
+            <input type="submit" value="添加商品" class="btn btn-primary" >
+         </a>
+{% endblock %}
+{% block content %}
+    {% verbatim myblock %}
+         <div class="content" id="content">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>商品编号</th>
+                <th>商品名称</th>
+                <th>商品数量</th>
+                <th>商品价格</th>
+                <th>商品保质期</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="goods in goods_list">
+                <td >
+                    <a v-bind:href="'/store/goods/'+goods.id+'/'">{{ goods.id }}</a>
+                </td>
+                <td>{{ goods.name}}</td>
+                <td>{{ goods.number }}</td>
+                <td>
+                    ￥<input type="text" v-bind:value="goods.price" v-on:blur="change_price(goods.id,$event)"    style="width: 150px">
+                </td>
+                <td>{{ goods.safe_data }}</td>
+                <td>
+                    <button v-if="goods.state==1" class="btn btn-danger" v-on:click="change_state(goods.id,'down')">下架</button>
+                    <button v-if="goods.state==0" class="btn btn-warning" v-on:click="change_state(goods.id,'up')" >上架</button>
+                    <button class="btn btn-primary">推荐</button>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+         <div class="dataTables_paginate paging_simple_numbers">
+             <ul class="pagination">
+                <li class="paginate_button page-item previous " v-for="p in page_range">
+                    <a class="page-link" v-on:click="get_page(p)">{{ p }}</a>
+                </li>
+             </ul>
+         </div>
+
+    </div>
+    {% endverbatim myblock %}
+    <script>
+        function bindFun(data){
+            this.goods_list = data["body"]["data"];
+            this.page = data['body']['page'];
+            this.page_range = data['body']['page_range'];
+
+        }
+        Vue.use(VueResource);//声明采用VueResource对象
+        var vue = new Vue(
+            {
+            el:'#content',
+            data:{
+                goods_list:[],
+                page_range:[],
+                pages:1
+            },
+                created:function () {
+                    this.$http.get('/store/GoodsView/').then(
+                        bindFun,
+                        function (error) {
+                            console.log(error)
+                        }
+                    )
+                },
+                methods:{
+                    change_state:function (id,state) {
+
+                        var url = '/store/changeState/?goods_id='+id+'&state='+ state;
+                        console.log(this.pages);
+                        console.log(url);
+                        this.$http.get(url).then(
+                            function (data) {
+                                if(this.pages != 1){
+                                    url = "/store/GoodsView/?page="+this.pages;
+                                    console.log(url)
+                                }
+                                else{
+                                    url = "/store/GoodsView/";
+                                    console.log(url)
+                                }
+                                this.$http.get(url).then(
+                                    bindFun,
+                                    function (error) {
+                                        console.log(error)
+                                    }
+                                )
+                            },
+                            function (error) {
+                                console.log(error)
+                            }
+                        )
+                    },
+                    change_price:function (id,e) {
+                        var change_price = $(e.srcElement).val();
+                        console.log(change_price);
+                        console.log(id);
+                        var url = '/store/changePrice/?goods_id='+id+'&price='+change_price;
+                        console.log(url);
+                        this.$http.get(url).then(
+                            function (data) {
+                                if (data["body"]["code"] == 200) {
+                                    alert("修改成功，当前价格为: " + price)
+                                }
+                                console.log(data)
+                            },
+                            function (error) {
+                                console.log(error)
+                            }
+                            )
+                    },
+                    get_page:function (page) {
+                        console.log(page);
+                        var url = '/store/GoodsView/?page='+page;
+                        this.$http.get(url).then(
+                            bindFun,
+                            this.pages = page,
+                            function(error){
+                                console.log(error)
+                            }
+                        )
+                    }
+                }
+            }
+        )
+    </script>
+
+
+
+{% endblock %}
