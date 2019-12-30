@@ -23,7 +23,7 @@ def registerQuser(request):
 
         user = Quser()
         user.username = username
-        user.eamil = email
+        user.email = email
         user.password = setPassword(password)
         user.save()
         return HttpResponseRedirect(redirect_url)

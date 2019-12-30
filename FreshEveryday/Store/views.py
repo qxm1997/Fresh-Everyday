@@ -1,9 +1,149 @@
-from django.shortcuts import render, HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, HttpResponseRedirect, HttpResponse,render_to_response
 from Store.models import *
 from django.core.paginator import Paginator
+import hashlib
+from Store.forms import *
 
 
 # Create your views here.
+
+
+def ce(request):
+    return HttpResponse('测试成功')
+
+
+# 加密
+def setPassword(password):
+    md5 = hashlib.md5()
+    md5.update(password.encode())
+    result = md5.hexdigest()
+    return result
+
+# def base(request):
+#     cookie_email = request.COOKIES.get('email')
+#     session_email = request.session.get('email')
+#     if cookie_email and session_email and cookie_email == session_email:
+#         return render_to_response('user/index.html', locals())  # 注意
+#     else:
+#         return HttpResponseRedirect('/user/login/')
+
+
+
+def index(request):
+    '''
+        首页
+        :param request:
+        :return:
+        '''
+    cookie_email = request.COOKIES.get('email')
+    session_email = request.session.get('email')
+    if cookie_email and session_email and cookie_email == session_email:
+        return render_to_response('store/index.html', locals())  # 注意
+    else:
+        return HttpResponseRedirect('/store/login/')
+    # return redirect(request,'/user/index')
+
+
+def Login(request):
+    '''
+    登录
+    :param request:
+    :return:
+    '''
+    if request.method == 'POST':
+
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        user = LoginUser.objects.filter(email=email).first()
+        if user:
+            db_password = user.password
+            password = setPassword(password)
+            if db_password == password:
+                response = HttpResponseRedirect('/store/vgl/')
+                response.set_cookie('email', user.email)
+                response.set_cookie('id', user.id)
+                request.session['email'] = user.email
+                return response
+    return render(request, 'store/login.html')
+
+
+def Register(request):
+    '''
+    注册
+    :param request:
+    :return:
+    '''
+
+    if request.method == 'POST':
+        user = UserForm(request.POST)
+        if user.is_valid():
+            data = user.cleaned_data
+            firstname = data.get('firstname')
+            lastname = data.get('lastname')
+            email = data.get('email')
+            password = data.get('password')
+
+            user = LoginUser()
+            user.username = lastname+firstname
+            user.email = email
+            user.password = setPassword(password)
+            user.save()
+            return HttpResponseRedirect('/store/login/')
+        else:
+            error = user.errors
+    return render(request, 'store/register.html', locals())
+
+
+
+def Loginout(request):
+    '''
+    登出
+    :param request:
+    :return:
+    '''
+    response = HttpResponseRedirect('/user/login/')
+    response.delete_cookie('email')
+    response.delete_cookie('id')
+    request.session.clear()
+    return response
+
+
+
+def forgetPassword(request):
+    '''
+    忘记密码
+    :param request:
+    :return:
+    '''
+    return render(request, 'store/forgot-password.html')
+
+
+
+
+def Uje(request):
+    result = {'data':''}
+    email = request.GET.get('email')
+    if email:
+        user = LoginUser.objects.filter(email=email).first()
+        if user:
+            result['data'] = '该邮箱用户已存在，请登录！'
+        else:
+            result['data'] = '该邮箱可以使用！'
+    return JsonResponse(result)
+
+
+
+
+
+
+
+
+
+
+
+
+
 def base(request):
     return render(request, 'store/base.html')
 
@@ -122,7 +262,7 @@ class GoodsView(View):
             else:
                 page = 1
             all_data = list(Goods.objects.all().values())
-            pageter = Paginator(all_data, 3)
+            pageter = Paginator(all_data, 25)
             goods_list = pageter.page(page).object_list
             self.result['page_range'] = list(pageter.page_range)
         self.result['data'] = list(goods_list)
@@ -187,3 +327,20 @@ def Goods_type(request):
     goods_list = GoodsType.objects.all().values()
     dic_list['data'] = list(goods_list)
     return JsonResponse(dic_list)
+
+
+from Store.spider import getSpider
+def getData(request):
+
+    task = {
+        1: "西红柿、芹菜、包菜、胡萝卜、油麦菜、土豆、洋葱、白菜、白萝卜、铁棍山药",
+        2: "奇异果、香蕉、榴莲、苹果、山竹、椰子、葡萄、橘子、橙子、柚子",
+        3: "鲍鱼、龙虾、甲鱼、大闸蟹、海带、皮皮虾、鲤鱼、海螺、鳕鱼、帝王蟹",
+        4: "猪头肉、猪蹄、猪排骨、五花肉、羊腰子、羊杂、羊蝎子、牛心、牛肉、羊蹄",
+        5: "鸡肉、土鸡蛋、鸭脖、鸭架、鸭蛋、鹅蛋、鹅肝、烤鸭、烧鸡、鹅掌",
+        6: "汤圆、饺子、海虾、速冻猪肉、肉丸、甜不辣、蟹排、鸡块、鱿鱼排、鱼丸",
+    }
+    for t in task:
+        for k in task[t].split("、"):
+            getSpider(k,t)
+    return HttpResponse("1111")

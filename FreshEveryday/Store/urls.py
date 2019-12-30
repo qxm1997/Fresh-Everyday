@@ -4,6 +4,14 @@ from django.views.decorators.csrf import csrf_exempt
 
 app_name = 'store'
 urlpatterns = [
+    path('index/', index),
+    path('login/', Login, name='login'),
+    path('register/', Register, name='register'),
+    path('loginout/', Loginout, name= 'loginout'),
+    path('forgetpwd/', forgetPassword, name='forget'),
+    path('uje/', Uje),
+
+
     path('base/', base),
     path('list_goods/', Goods_list),
     path('add_goods/', Goods_add, name='add_goods'),
@@ -17,6 +25,12 @@ urlpatterns = [
     path('GoodsType/', Goods_type),
 
 
+
+
+
+]
+urlpatterns += [
+    path('getData/', getData),
 
 
 ]

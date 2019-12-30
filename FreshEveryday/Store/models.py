@@ -4,6 +4,15 @@ from django.db import models
 # Create your models here.
 
 
+class LoginUser(models.Model):
+    username = models.CharField(max_length=32) # 全名
+    email = models.EmailField()
+    password = models.CharField(max_length=32)
+
+
+
+
+
 
 
 

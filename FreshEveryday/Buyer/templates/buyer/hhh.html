@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+            {% for k,v in request.GET.items %}
+                   <p>{{ k }}&nbsp;&nbsp;:&nbsp;{{ v }}</p>
+            {% endfor %}
+
+</body>
+</html>

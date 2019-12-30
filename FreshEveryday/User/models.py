@@ -6,7 +6,7 @@ from django.db import models
 #定义用户信息
 class Quser(models.Model):
     username = models.CharField(max_length=32,blank=True,null=True)
-    eamil = models.EmailField()
+    email = models.EmailField()
     password = models.CharField(max_length=32)
 
 
@@ -23,11 +23,13 @@ class Address(models.Model):
     post_code = models.CharField(max_length=32)
     phone = models.CharField(max_length=32)
     user = models.ForeignKey(to=Quser,on_delete=models.CASCADE)
+    is_now = models.IntegerField(default=0)  # 0默认地址 1当前地址
 
 
 class BuyCar(models.Model):
     goods_name = models.CharField(max_length=32)
-    goods_price = models.FloatField()
+    goods_price = models.FloatField()  # 单价
+    goods_total = models.FloatField()  # 总价
     goods_number = models.IntegerField()#购买数量
     goods_picture = models.CharField(max_length=32)
     goods_store = models.IntegerField()#店铺id
@@ -35,10 +37,11 @@ class BuyCar(models.Model):
 
 class PayOrder(models.Model):
     pay_number = models.CharField(max_length=32)
-    pay_price = models.FloatField()#订单总计
+    pay_price = models.FloatField(default=0)#订单总计
     pay_status = models.IntegerField() #1未支付  2支付未发货   3、待收货   4确认收货   5(退货)
     goods_total = models.IntegerField()#商品总数量
     user = models.ForeignKey(to=Quser,on_delete=models.CASCADE)
+    address = models.ForeignKey(to=Address,on_delete=models.CASCADE)
 
 
 
